@@ -42,7 +42,9 @@ for (i in 1:length(paramYear)) {
 ```
 
 ### Adding Columns
-``` 
+```
+Column names and explanations are below:
+  
   1.kategori :İşyeri Grubu
   2.kk_Islem_Adedi :İşlem Adedi(Kredi Kartı)
   3.bk_Islem_Adedi :İşlem Adedi(Banka Kartı)
