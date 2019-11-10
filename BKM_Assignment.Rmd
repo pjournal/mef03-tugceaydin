@@ -41,17 +41,15 @@ for (i in 1:length(paramYear)) {
 
 ```
 
-### Adding Columns 
-
-Column names and explanations are below:
-
-  kategori :İşyeri Grubu
-  kk_Islem_Adedi :İşlem Adedi(Kredi Kartı)
-  bk_Islem_Adedi :İşlem Adedi(Banka Kartı)
-  kk_Islem_Tutari :İşlem Tutarı(Kredi Kartı)
-  bk_Islem_Tutari :İşlem Tutarı(Kredi Kartı)
-  yearmonth 
-
+### Adding Columns
+``` 
+  1.kategori :İşyeri Grubu
+  2.kk_Islem_Adedi :İşlem Adedi(Kredi Kartı)
+  3.bk_Islem_Adedi :İşlem Adedi(Banka Kartı)
+  4.kk_Islem_Tutari :İşlem Tutarı(Kredi Kartı)
+  5.bk_Islem_Tutari :İşlem Tutarı(Kredi Kartı)
+  6.yearmonth 
+```
 ```{r columnnames}
 
 colnames(raw_data_full) <- c('kategori','kk_Islem_Adedi','bk_Islem_Adedi','kk_Islem_Tutari','bk_Islem_Tutari'                              ,'yearmonth')
@@ -89,7 +87,7 @@ ggplot(by_raw_data, aes(x=year, y=toplam, fill=kategori))+
   geom_bar(stat="identity")+
 #  geom_text(aes(label=toplam), vjust=1.6, color="black", size=3.5)+
   theme_minimal()+
-  labs(x="Year",y="Total",title="Plot",fill="Category")+
+  labs(x="Year",y="Total",title="Top 3 Category (2017 to 2019 June) ",fill="Category")+
   theme(axis.text.x = element_text(angle=30))
 
 ```
@@ -98,13 +96,13 @@ ggplot(by_raw_data, aes(x=year, y=toplam, fill=kategori))+
 
 ```{r analyze_2}
 
-KategoryDataSet <-raw_data_full  %>%group_by(yearmonth)%>% summarize(kk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", kk_Islem_Tutari))),na.rm=T),bk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", bk_Islem_Tutari))),na.rm=T))%>%mutate(year=substr(yearmonth,1,4)) %>%filter(kk_Islem_Tutari!=0)%>% select(yearmonth,kk_Islem_Tutari,bk_Islem_Tutari)
+CategoryDataSet <-raw_data_full  %>%group_by(yearmonth)%>% summarize(kk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", kk_Islem_Tutari))),na.rm=T),bk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", bk_Islem_Tutari))),na.rm=T))%>%mutate(year=substr(yearmonth,1,4)) %>%filter(kk_Islem_Tutari!=0)%>% select(yearmonth,kk_Islem_Tutari,bk_Islem_Tutari)
 
 
 
-DataSet <- data.frame(YearMonth=c(KategoryDataSet$yearmonth),
-  Kategory = c("Banka Kartı Tutarı","Kredi Kartı Tutarı")
-  , Tutar=c(KategoryDataSet$bk_Islem_Tutari,KategoryDataSet$kk_Islem_Tutari))
+DataSet <- data.frame(YearMonth=c(CategoryDataSet$yearmonth),
+  Kategory = c("Debit Card Amount","Credit Card Amount")
+  , Tutar=c(CategoryDataSet$bk_Islem_Tutari,CategoryDataSet$kk_Islem_Tutari))
 DataSet
 ```
 
@@ -115,19 +113,19 @@ DataSet
 library(tidyverse)
 library(dplyr)
 
-KategoryDataSet_Yearly <-raw_data_full %>%mutate_if(is.numeric,funs(ifelse(is.na(.),0,.))) %>%  mutate(year=substr(yearmonth,1,4))%>%group_by(year)%>% summarize(kk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", kk_Islem_Tutari))),na.rm=T),bk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", bk_Islem_Tutari))),na.rm=T)) %>%filter(kk_Islem_Tutari!=0)%>% select(year,kk_Islem_Tutari,bk_Islem_Tutari)
+CategoryDataSet_Yearly <-raw_data_full %>%mutate_if(is.numeric,funs(ifelse(is.na(.),0,.))) %>%  mutate(year=substr(yearmonth,1,4))%>%group_by(year)%>% summarize(kk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", kk_Islem_Tutari))),na.rm=T),bk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", bk_Islem_Tutari))),na.rm=T)) %>%filter(kk_Islem_Tutari!=0)%>% select(year,kk_Islem_Tutari,bk_Islem_Tutari)
 
 #Chart data set
-DataSet_Yearly <- data.frame(Year=c(KategoryDataSet_Yearly$year),
-  Kategory = c("Banka Kartı Tutarı","Kredi Kartı Tutarı")
-  , Tutar=c(KategoryDataSet_Yearly$bk_Islem_Tutari,KategoryDataSet_Yearly$kk_Islem_Tutari))
+DataSet_Yearly <- data.frame(Year=c(CategoryDataSet_Yearly$year),
+  Category = c("Debit Card Amount","Credit Card Amount")
+  , Amount=c(CategoryDataSet_Yearly$bk_Islem_Tutari,CategoryDataSet_Yearly$kk_Islem_Tutari))
 
-DataSet_Yearly<-DataSet_Yearly%>% arrange(Year,Kategory,Tutar)
+DataSet_Yearly<-DataSet_Yearly%>% arrange(Year,Category,Amount)
 
 DataSet_Yearly
 
-ggplot(data=DataSet_Yearly, aes(x=Year, y=Tutar, group=Kategory)) +
-  geom_line(aes(color=Kategory))+
-  geom_point(aes(color=Kategory)) 
+ggplot(data=DataSet_Yearly, aes(x=Year, y=Amount, group=Category)) +
+  geom_line(aes(color=Category))+
+  geom_point(aes(color=Category)) 
 
 ```
