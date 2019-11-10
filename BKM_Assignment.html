@@ -370,9 +370,7 @@ summary {
 <h2>1.Data Extraction</h2>
 <p>BKM Sektörel Gelişim reports include transaction amounts and transaction count made by credit and debit cards on sectoral basis. Before We start to data analyse firstly we extract data from Html and construct the suitable format that we can start analyze.</p>
 <pre class="r"><code>extractYearMonth&lt;- function(year,month) {
-  x1&lt;-year
-  x2&lt;-month
-  url &lt;- paste(&#39;https://bkm.com.tr/secilen-aya-ait-sektorel-gelisim/?filter_year=&#39;,x1,&#39;&amp;filter_month=&#39;,x2,&#39;&amp;List=Listele&#39;, sep=&#39;&#39;,collapse = NULL)
+  url &lt;- paste(&#39;https://bkm.com.tr/secilen-aya-ait-sektorel-gelisim/?filter_year=&#39;,year,&#39;&amp;filter_month=&#39;,month,&#39;&amp;List=Listele&#39;, sep=&#39;&#39;,collapse = NULL)
   return(url)
 }
 
@@ -390,18 +388,6 @@ for (i in 1:length(paramYear)) {
     raw_data_full&lt;-rbind(raw_data_full,df)
   }
 }</code></pre>
-<pre><code>## Warning: funs() is soft deprecated as of dplyr 0.8.0
-## Please use a list of either functions or lambdas: 
-## 
-##   # Simple named list: 
-##   list(mean = mean, median = median)
-## 
-##   # Auto named with `tibble::lst()`: 
-##   tibble::lst(mean, median)
-## 
-##   # Using lambdas
-##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-## This warning is displayed once per session.</code></pre>
 <div id="adding-columns" class="section level3">
 <h3>Adding Columns</h3>
 <p>Column names and explanations are below:</p>
