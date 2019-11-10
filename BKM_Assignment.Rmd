@@ -1,0 +1,135 @@
+---
+title: "Bkm_Assignment"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rvest)
+library(dplyr)
+library(purrr)
+library(tidyverse)
+```
+
+## 1.Data Extraction 
+
+BKM Sektörel Gelişim reports include transaction amounts and transaction count made by credit and debit cards on sectoral basis. 
+Before We start to data analyse firstly we extract data from Html and construct the suitable format that we can start analyze.
+
+```{r extract}
+
+extractYearMonth<- function(year,month) {
+  x1<-year
+  x2<-month
+  url <- paste('https://bkm.com.tr/secilen-aya-ait-sektorel-gelisim/?filter_year=',x1,'&filter_month=',x2,'&List=Listele', sep='',collapse = NULL)
+  return(url)
+}
+
+paramYear <-c('2017','2018','2019')
+paramMonth <- c('01','02','03','04','05','06','07','08','09','10','11','12')
+raw_data_full <- ''
+    
+for (i in 1:length(paramYear)) {
+  for (j in 1:length(paramMonth)) {
+    if (paramYear[i]=='2019' & paramMonth[j]=='07') {break}
+    url<-extractYearMonth(paramYear[i],paramMonth[j])
+    page <- read_html(url) #Creates an html document from URL
+    df <- page%>%html_nodes("table") %>%.[(4)] %>% html_table(page, fill = TRUE,header = FALSE)  %>%  as.data.frame() %>%slice(3:max(nrow(.)))  
+    df <- df %>%mutate_if(is.numeric,funs(ifelse(is.na(.),0,.))) %>%  mutate(yearmonth=paste(paramYear[i],paramMonth[j],sep=''))
+    raw_data_full<-rbind(raw_data_full,df)
+  }
+}
+
+```
+
+### Adding Columns 
+
+Column names and explanations are below:
+
+  kategori :İşyeri Grubu
+  kk_Islem_Adedi :İşlem Adedi(Kredi Kartı)
+  bk_Islem_Adedi :İşlem Adedi(Banka Kartı)
+  kk_Islem_Tutari :İşlem Tutarı(Kredi Kartı)
+  bk_Islem_Tutari :İşlem Tutarı(Kredi Kartı)
+  yearmonth 
+
+```{r columnnames}
+
+colnames(raw_data_full) <- c('kategori','kk_Islem_Adedi','bk_Islem_Adedi','kk_Islem_Tutari','bk_Islem_Tutari'                              ,'yearmonth')
+head(raw_data_full,10)
+
+```
+
+## 2.Data Analyzing 
+
+### 2.1.Top 3 Category with the Highest Numberf Transactions
+
+Displaying the highest number of transactions by credit card and debit card by years.(2017 to 2019 June)
+```{r analyze_1}
+#Create dataset for the analyzing
+
+raw_data <-raw_data_full
+raw_data <- raw_data %>%mutate_if(is.numeric,funs(ifelse(is.na(.),0,.))) %>%  mutate(year=substr(yearmonth,1,4))
+
+raw_data <-raw_data%>% group_by(kategori,year) %>% summarise(toplam_kk_adet=max(sum(as.numeric(gsub("\\.","",kk_Islem_Adedi)),na.rm=T)),toplam_bk_adet=max(sum(as.numeric(gsub("\\.","",bk_Islem_Adedi)),na.rm = T))) %>% select(year,kategori,toplam_kk_adet,toplam_bk_adet)
+
+#Adding "toplam" column
+raw_data2<-raw_data %>% mutate( toplam= (toplam_kk_adet+toplam_bk_adet))%>% select(year,kategori,toplam)%>%filter(toplam!=0)
+
+#Filter unnecessary data
+raw_data3 <-raw_data2%>%arrange(year,desc(toplam))%>%filter(kategori!='TOPLAM')
+
+#Data set preparation for chart
+by_raw_data <- raw_data3 %>% group_by(year) %>% mutate(
+   rank =row_number(),vars_group = 'year'
+  ) %>% filter(rank<4)
+
+print(by_raw_data)
+
+ggplot(by_raw_data, aes(x=year, y=toplam, fill=kategori))+
+  geom_bar(stat="identity")+
+#  geom_text(aes(label=toplam), vjust=1.6, color="black", size=3.5)+
+  theme_minimal()+
+  labs(x="Year",y="Total",title="Plot",fill="Category")+
+  theme(axis.text.x = element_text(angle=30))
+
+```
+
+### 2.2.Monthly debit card and credit card amount.
+
+```{r analyze_2}
+
+KategoryDataSet <-raw_data_full  %>%group_by(yearmonth)%>% summarize(kk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", kk_Islem_Tutari))),na.rm=T),bk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", bk_Islem_Tutari))),na.rm=T))%>%mutate(year=substr(yearmonth,1,4)) %>%filter(kk_Islem_Tutari!=0)%>% select(yearmonth,kk_Islem_Tutari,bk_Islem_Tutari)
+
+
+
+DataSet <- data.frame(YearMonth=c(KategoryDataSet$yearmonth),
+  Kategory = c("Banka Kartı Tutarı","Kredi Kartı Tutarı")
+  , Tutar=c(KategoryDataSet$bk_Islem_Tutari,KategoryDataSet$kk_Islem_Tutari))
+DataSet
+```
+
+### 2.3.Annual Debit Card and Credit Card amount and chart.
+
+
+```{r analiz3}
+library(tidyverse)
+library(dplyr)
+
+KategoryDataSet_Yearly <-raw_data_full %>%mutate_if(is.numeric,funs(ifelse(is.na(.),0,.))) %>%  mutate(year=substr(yearmonth,1,4))%>%group_by(year)%>% summarize(kk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", kk_Islem_Tutari))),na.rm=T),bk_Islem_Tutari= sum(as.numeric(gsub(",", ".", gsub("\\.", "", bk_Islem_Tutari))),na.rm=T)) %>%filter(kk_Islem_Tutari!=0)%>% select(year,kk_Islem_Tutari,bk_Islem_Tutari)
+
+#Chart data set
+DataSet_Yearly <- data.frame(Year=c(KategoryDataSet_Yearly$year),
+  Kategory = c("Banka Kartı Tutarı","Kredi Kartı Tutarı")
+  , Tutar=c(KategoryDataSet_Yearly$bk_Islem_Tutari,KategoryDataSet_Yearly$kk_Islem_Tutari))
+
+DataSet_Yearly<-DataSet_Yearly%>% arrange(Year,Kategory,Tutar)
+
+DataSet_Yearly
+
+ggplot(data=DataSet_Yearly, aes(x=Year, y=Tutar, group=Kategory)) +
+  geom_line(aes(color=Kategory))+
+  geom_point(aes(color=Kategory)) 
+
+```
