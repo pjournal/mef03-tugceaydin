@@ -17,12 +17,10 @@ library(tidyverse)
 BKM Sektörel Gelişim reports include transaction amounts and transaction count made by credit and debit cards on sectoral basis. 
 Before We start to data analyse firstly we extract data from Html and construct the suitable format that we can start analyze.
 
-```{r extract}
+```{r extract , warning=FALSE}
 
 extractYearMonth<- function(year,month) {
-  x1<-year
-  x2<-month
-  url <- paste('https://bkm.com.tr/secilen-aya-ait-sektorel-gelisim/?filter_year=',x1,'&filter_month=',x2,'&List=Listele', sep='',collapse = NULL)
+  url <- paste('https://bkm.com.tr/secilen-aya-ait-sektorel-gelisim/?filter_year=',year,'&filter_month=',month,'&List=Listele', sep='',collapse = NULL)
   return(url)
 }
 
