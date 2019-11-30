@@ -1,0 +1,96 @@
+---
+title: "Join Assignment"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+
+```
+
+```
+ This assingment contains data analyzing on ATP World Tour Tennis Data
+ 
+``` 
+ [Data Source](https://github.com/serve-and-volley/atp-world-tour-tennis-data) 
+
+
+## Data Extraction
+```{r extract}
+
+url<-url("https://github.com/pjournal/mef03-tugceaydin/blob/master/atp_tennis_data_2017.RData?raw=true")
+atp_tennis<- load(url)
+ 
+
+view(tourney_df)
+view(player_df)   
+view(stats_df )       
+view(score_df)     
+view(rank_df)         
+view(data_source_url)
+```
+
+### Rank countries (flag codes) by the number of singles champions
+
+
+```{r country}
+
+join_country<-left_join(tourney_df, player_df, by = c("singles_winner_player_id" = "player_id"))
+
+rank_country<-join_country%>%  count(flag_code,sort=TRUE)
+
+rank_country
+
+```
+### Rank countries which did not get any singles championships by the games won when they win the match
+
+
+```{r no_championships}
+
+join_country<-left_join(tourney_df, player_df, by = c("singles_winner_player_id" = "player_id"))
+
+no_championships <- player_df %>% select(player_id,flag_code)%>% anti_join(.,rank_country)
+
+
+no_championships<-no_championships%>% left_join(.,score_df,  by = c("player_id" = "winner_player_id"))%>%group_by(flag_code)%>%  summarise(total_won=sum(winner_games_won,na.rm=TRUE))%>%arrange(desc(total_won))
+
+
+no_championships
+
+```
+
+###  5 winner player  which had maximum match duration
+
+```{r winner}
+
+join_match<-score_df%>%select(winner_player_id,match_id) %>% inner_join(stats_df, score_df, by = c("match_id" = "match_id"))
+
+winner_player <-  inner_join(join_match, player_df, by = c("winner_player_id.x" = "player_id"))%>% select(first_name,last_name,match_duration)%>%arrange(desc(match_duration))
+
+by_raw_data <- winner_player %>%mutate(PlayerName=paste(first_name," ",last_name),rank =row_number(),vars_group = 'match_duration' ) %>% filter(rank<6) %>%select(PlayerName,match_duration) 
+
+by_raw_data
+
+```
+
+###  The most 5 youngest single winner player
+
+```{r youngest}
+
+
+join_winner<-inner_join(player_df, tourney_df, by = c("player_id" = "singles_winner_player_id"))%>%select(player_id,first_name,last_name)
+
+
+join_age<-inner_join(join_winner, rank_df, by = c("player_id" = "player_id"))
+
+join_age <- join_age%>%arrange(player_age)%>%distinct(first_name,last_name,player_age)
+
+by_age_data <- join_age %>%mutate(PlayerName=paste(first_name," ",last_name),rank =row_number(),vars_group = 'player_age' ) %>% filter(rank<6) %>%select(PlayerName,player_age) 
+
+by_age_data
+
+```
+
+
