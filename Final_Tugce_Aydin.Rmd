@@ -1,0 +1,305 @@
+---
+title: "Final BDA 503 - Fall 2019"
+author: "Tugce AYDIN"
+date: "12/21/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(readr)
+install.packages('DataExplorer', repos = "http://cran.us.r-project.org")
+library(DataExplorer)
+```
+
+## Part I: Short and Simple
+
+### Question 1
+```
+1. What is your opinion about the AI hype? Do you think that, in 10 years, AI will solve many critical
+problems? What about the required human capital to build all the AI? If we consider a sufficient level
+a 100 what would be our level as Turkey / World? Why do you think so? (Give a number for both
+Turkey and the World and defend your scoring)
+
+```
+### Answer
+
+Artificial intelligence will shape our living standards, the way we live and offer us a new culture of life. I don't believe that this technology  will be end of world, but it can manipulate our lives! Like a Cambridge Analytica scandal.
+
+Ai can be solve the many problems on many sector.I think It will be effect all industry in the next 10 year.Such as in healty sector,AI can get ahead of the doctors in the diagnosis of various diseases. AI  is replacing  to Call centers.Human support to call centers can be very diminished. So While artificial intelligence reduces the need for manpower in many professions, Manpower in artificial intelligence field will increase exponentially.The resources allocated by the companies to Artificial Intelligence will continue to increase over the years.
+
+We experience the Artificial Intelligence on  the voice response system in call centers of institutions such as banks and telecommunications in Turkey. By the way Institutions use the AI for predictive analytics.But When we look applications of AI in the world ,such as self driving vehicles,AI Translation earbuds vs. We see that they are precursor ,but we can say Turkey is strict follower of AI especially in private sector.So While I can evaluate with 65 points out of 100  for Turkey ,  I can give 85 points to the World .
+
+
+
+### Question 2
+
+```
+2. What is your exploratory data analysis workflow? Suppose you are given a data set and a research
+question. Where do you start? How do you proceed? For instance, you are given the task to distribute
+funds from donations to public welfare projects in a wide range of subjects (e.g. education, gender
+equality, poverty, job creation, healthcare) with the objective of maximum positive impact on the society
+in general. Assume you have almost all the data you require. How do you measure impact? How do
+you form performance measures? What makes you think you find an interesting angle?
+Would you present an argument for a policy that you are more inclined to (e.g. suppose you are more
+inclined to allocate budget to fix gender inequality than affordable healthcare) or would you just present
+what data says? In other words, would the (honest) title of your presentation be “Gender Inequality -
+The Most Important Social Problem Backed by Data” or “Pain Points in Our Society and Optimal
+Budget Allocation”?
+```
+
+### Answer
+
+First of all, I generate questions about the dataset. Then I make data cleaning and look for answers to my questions by visualizing, transforming and modeling my data.According to what I learned from my analysis, I renew my questions or continue to examine them by producing new questions.
+
+If I  had distrubuted funds from donations to public welfare projects ,I would try to find relation between subjects and  their positive impact on the society. When I  model the data set ,I  seperate according to subjects.First of all, I prefer to examine subjects' effects one by one. Then I try to identify areas that affect one other.Such as When You support job creation, You can make positive impact on poverty also.
+
+Probably My first questions  will be based on measuring the points that I already know about the society in where I live.If the answers that I received different from what I expected, I prefer  to distribute funds based on the data.
+
+
+### Question 3
+
+```
+3. If you had to plot a single graph using the diamonds data what would it be? Why? Make your argument,
+actually code the plot and provide the output. (You can find detailed info about the movies data set in
+its help file. Use ?diamonds, after you load ggplot2 package.)
+```
+
+### Answer
+
+
+I prefer to choose a chart that highlights the attributes that affect the price.Because The price shows the value of the diamond, and it is important to know what increases it.
+
+
+```{r diamondgraph ,warning=FALSE}
+library(ggplot2)
+dplyr::glimpse(diamonds)
+
+# Relation of carat and price according to diamond cut and color
+
+ggplot(diamonds,aes(x=carat,y=price))+geom_jitter(aes(color=color,shape=cut))+
+labs(title="Relation of carat and price according to diamond cut and color.")
+
+
+
+```
+
+## Part II: Extending Your Group Project
+
+
+
+House Sales to Foreigners has been the one part of our project. We have reported total house sales to foreigners  by year and  season. In addition, we presented sales figures with the province detail.
+I will add more detail to this part and I will analyze sales figures by months  for 2013 to 2019.
+
+
+### Comparing home sales to foreigners  by years and months.
+
+```{r readcsv ,warning=FALSE}
+
+# Reading csv from the url
+file_url<- paste('https://github.com/pjournal/mef03g-road-runner/blob/master/TUIK-DATA/House_Sales_Foreigners.csv?raw=true', sep='')
+
+
+raw_data <- read.csv(file_url,sep=',',header=T)
+Tuik_Foreigners <- raw_data %>% mutate_if(is.numeric,funs(ifelse(is.na(.),0,.)))
+
+```
+
+```{r form ,warning=FALSE}
+
+# Forming the data set for analysis
+
+df_January   <- Tuik_Foreigners %>% group_by(Year) %>% summarise(total_sum=sum(January))%>% 
+              mutate(Month='January',rank=1)%>%select(Year,Month,total_sum,rank)
+df_February <- Tuik_Foreigners %>% group_by(Year) %>% summarise(total_sum=sum(February))        %>% 
+              mutate(Month='February',rank=2)%>%select(Year,Month,total_sum,rank)
+df_March   <- Tuik_Foreigners %>% group_by(Year) %>% 
+              summarise(total_sum=sum(March))%>%mutate(Month='March',rank=3)%>%select(Year,Month,total_sum,rank)
+df_April   <- Tuik_Foreigners %>% group_by(Year) %>% 
+              summarise(total_sum=sum(March))%>%mutate(Month='April',rank=4)%>%select(Year,Month,total_sum,rank)
+df_May     <- Tuik_Foreigners %>% group_by(Year) %>% 
+              summarise(total_sum=sum(May))%>%mutate(Month='May',rank=5)%>%select(Year,Month,total_sum,rank)
+df_June    <- Tuik_Foreigners %>% group_by(Year) %>% 
+              summarise(total_sum=sum(June))%>%mutate(Month='June',rank=6)%>%select(Year,Month,total_sum,rank)
+df_July    <- Tuik_Foreigners %>% group_by(Year) %>% 
+              summarise(total_sum=sum(July))%>%mutate(Month='July',rank=7)%>%select(Year,Month,total_sum,rank)
+df_August  <- Tuik_Foreigners %>% group_by(Year) %>% summarise(total_sum=sum(August))%>% 
+              mutate(Month='August',rank=8) %>%select(Year,Month,total_sum,rank)
+df_September <- Tuik_Foreigners %>% group_by(Year) %>% summarise(total_sum=sum(September))%>% 
+              mutate(Month='September',rank=9)%>%select(Year,Month,total_sum,rank)
+df_October  <- Tuik_Foreigners %>% group_by(Year) %>% summarise(total_sum=sum(October))%>% 
+              mutate(Month='October',rank=10)%>%select(Year,Month,total_sum,rank)
+df_November <- Tuik_Foreigners %>% group_by(Year) %>% summarise(total_sum=sum(November))%>% 
+              mutate(Month='November',rank=11)%>%select(Year,Month,total_sum,rank)
+df_December <- Tuik_Foreigners %>% group_by(Year) %>% summarise(total_sum=sum(December))%>% 
+              mutate(Month='December',rank=12)%>%select(Year,Month,total_sum,rank)
+
+
+```
+
+```{r union ,warning=FALSE}
+
+# Union all 
+
+df_sales_by_month <- union(union(union(union(union(union(union(union(union(union(union(df_January,df_February),df_March),df_April),df_May),df_June),df_July),df_August),df_September),df_October),df_November),df_December)
+
+```
+
+
+```{r visualization ,warning=FALSE}
+
+#Data set for visualization
+
+df_sales_by_month <-df_sales_by_month%>% group_by(Year,Month,rank) %>% summarise(total_sum=sum(total_sum)) %>% select(Year,Month,total_sum,rank) %>%arrange(rank)
+
+head(df_sales_by_month, 10)
+
+```
+
+
+
+```{r pressure, echo=FALSE ,warning=FALSE}
+
+ggplot(data = df_sales_by_month, aes(x = Month , y = total_sum ,group=Year)) +
+  #geom_bar(aes(fill = factor(..x.., labels = "Month")), stat = "identity") +
+  geom_bar(aes(fill=Month), stat = "identity") +
+  labs(fill = "Month") +
+  facet_grid(~ Year) +
+  scale_y_continuous("House Sales") +
+  theme(axis.text.x = element_text(size=5 ,angle = 90, hjust = 1)) 
+
+```
+
+### Conclusion
+
+When We analyze by months,We can say that home sales are more active in September,October and November.
+
+We can also observe this evaluation better when we look at the figures  on the basis of months independent of year. You can check from below graph.
+
+**2019 November and December data is missing.TUIK  haven't published those data yet.
+
+
+
+```{r pressure2, echo=FALSE,warning=FALSE}
+df_sales_by_month_2 <- df_sales_by_month%>% group_by(Month,rank) %>% summarise(total_sum=sum(total_sum)) %>% select(Month,total_sum,rank) %>%arrange(rank)
+
+ggplot(data = df_sales_by_month_2, aes(x = Month , y = total_sum )) +
+  geom_bar(aes(fill=Month), stat = "identity") +
+  labs(fill = "Month") +
+  scale_y_continuous("House Sales") +
+  theme(axis.text.x = element_text(size=8 ,angle = 90, hjust = 1)) 
+
+```
+
+
+## Part III: Welcome to Real Life 
+
+In this part I analyze Organing Farming Data Set that has been published by Republic Of Turkey Ministry Of Agriculture.I will examine Organic Agriculture Data between 2014-2018 by province, agri product and Quantity pf Production.
+[Data Link](https://www.tarimorman.gov.tr/Konular/Bitkisel-Uretim/Organik-Tarim/Istatistikler)
+
+### Data Cleaning
+
+Extracting data set and Reformatting data.
+
+```{r pressure_3, echo=FALSE ,warning=FALSE}
+load(url("https://github.com/pjournal/mef03g-road-runner/blob/master/FINAL_DATA/all_organic_agriculture.RData?raw=true")  )     
+#Missing Values 
+plot_missing(all_organic_agriculture)
+```
+
+Added 0 value to numeric columns for rows that have missing value.
+Null values for "URUN_ADI" is coming for cumulative total rows. So we don't need any arrangement.
+It is expected value for those rows.
+
+```{r pressure3 ,warning=FALSE}
+#Reformatting  data
+all_organic_agriculture <- 
+    all_organic_agriculture %>%mutate_if(is.numeric,funs(ifelse(is.na(.),0,.)))
+# NA analyzing for URUN_ADI column
+na_URUN_ADI <-all_organic_agriculture%>%filter(is.na(URUN_ADI))
+head(na_URUN_ADI,3)
+```
+
+### Variables
+Data period is Annual.
+Column names and explanations are below
+
+<ol type = "1">
+<li>YIL : Year </li>
+<li>ILLER: Provice</li>
+<li>URUN_ADI: Product Name</li>
+<li>GERCEK_CIFTCI_SAYISI: Number Of Real Farmers</li>
+<li>GERCEK_URETIM_ALANIHA: Real Production Area</li>
+<li>DOGAL_TOPLAMA_ALANI(HA): Natural Collection Area</li>
+<li>NADAS_ALANI(HA): Fallow Area</li>
+<li>TOPLAM_ALANI(HA): Total Area </li>
+<li>URETIM_MIKTARI_TON_TOPLAMI: Total of Production Quantity(tons)</li>
+</ol>
+
+```{r variables ,warning=FALSE}
+str(all_organic_agriculture)
+```
+
+### Visualization
+
+There is 489 organic agri product 2014 to 2018.
+
+```{r part3_visualization ,warning=FALSE}
+df_full <-all_organic_agriculture%>% group_by(URUN_ADI) %>%filter(!is.na(URUN_ADI))%>%select( URUN_ADI )%>% distinct()
+NROW(na.omit(df_full))
+```
+
+The 10 Most Produced Organic Product in Turkey
+
+```{r part3_graph1 ,warning=FALSE}
+
+df_Quantity_by_product_name <-all_organic_agriculture%>% group_by(URUN_ADI) %>%filter(!is.na(URUN_ADI))%>%summarise(Total_Product_Quantity=sum(URETIM_MIKTARI_TON_TOPLAMI))%>%select( URUN_ADI ,Total_Product_Quantity )%>% arrange(desc(Total_Product_Quantity))%>%mutate( rank =row_number(),vars_group = 'Total_Product_Quantity' )%>% filter(rank<11)%>%select(PRODUCT_NAME=URUN_ADI,Total_Product_Quantity,rank)
+  
+ggplot(df_Quantity_by_product_name, aes(x=PRODUCT_NAME, y=Total_Product_Quantity, fill=PRODUCT_NAME))+
+  geom_bar(stat="identity")+
+  theme_minimal()+
+  labs(x="Product Name",y="# Tons",title="The 10 Most Produced Organic Product",fill="Product of Organic Farming")+
+  theme(axis.text.x = element_text(angle=90))
+```
+
+When We look at the overall picture in Turkey, we can see the intensity of quantity of production  by provinces on the map.
+
+```{r part3_turkey ,warning=FALSE ,echo = FALSE }
+
+TURKEY <- readRDS(url("https://github.com/pjournal/mef03g-road-runner/blob/master/TUIK-DATA/gadm36_TUR_1_sp.rds?raw=true"))
+TUR_for <- fortify(TURKEY)
+
+#Creating data frame for total quantity of organic agri product by province
+df_Quantity_by_province_full<-all_organic_agriculture%>% group_by(ILLER) %>%filter(!is.na(URUN_ADI))%>%summarise(Total_Product_Quantity=sum(URETIM_MIKTARI_TON_TOPLAMI))%>%select(Province=ILLER,Total_Product_Quantity)
+#Join  df and Turkey location info
+Id_Cıty_Map <- data_frame(id = rownames(TURKEY@data),
+                            Province = str_to_upper(TURKEY@data$NAME_1, locale = "en")) %>% 
+              left_join(df_Quantity_by_province_full, by = "Province")
+final_map <- left_join(TUR_for, Id_Cıty_Map, by = "id")
+
+Province_map_data <- final_map %>%
+  group_by(Province) %>%
+  summarise(long = mean(long), lat = mean(lat))
+```
+
+```{r turkey_graph ,warning=FALSE}
+ggplot(final_map) +
+  geom_polygon( aes(x = long, y = lat, group = group, fill = Total_Product_Quantity),
+                color = "grey") +
+    geom_text(aes(x = long, y = lat,label = Province), data = Province_map_data,  size = 1.5, hjust = 0.5)+
+  coord_map() +
+  theme_void() + 
+  labs(title = "ORGANIC FARMING IN TURKEY") +
+  scale_fill_distiller(name = "Total Product Quantity",
+                       palette = "Spectral", limits = c(0,1000000), na.value = "White") +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+```
+
+
+Aydin and Agri is the cities that have the highest intensity of organic farming according to total production quantity.You can reach intensity of organic farming for the other provinces using color range table near the graph . 
